@@ -111,17 +111,49 @@
             border-radius: var(--border-radius);
             text-align: center;
             font-size: 0.95rem; /* Slightly larger alert text */
+            font-weight: 500; /* Ensure text is bold enough */
         }
         .alert-danger {
-            color: #fff; /* White text for better contrast on dark red */
-            background-color: var(--danger-color);
-            border-color: #c0392b; /* Darker red border */
+            color: var(--dark-color);
+            background-color: #f8d7da; /* Lighter background for dark text */
+            border-color: #f5c2c7;
         }
         .alert-success {
-            color: #fff; /* White text for better contrast on dark green */
-            background-color: var(--success-color);
-            border-color: #27ae60; /* Darker green border */
+            color: var(--dark-color);
+            background-color: #d1e7dd; /* Lighter background for dark text */
+            border-color: #badbcc;
         }
+        /* Ensure login buttons have sufficient text contrast */
+        .login-button {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background-color: var(--primary-color);
+            color: var(--dark-color); /* Darker text for contrast on teal */
+            border: 1px solid var(--primary-color-darker); /* Border for definition */
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s, color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .login-button:hover {
+            background-color: var(--primary-color-darker);
+            color: #fff; /* White text on darker hover for visual feedback */
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        /* Explicit focus style for buttons if not covered by input:focus */
+        .login-button:focus {
+            outline: 2px solid var(--primary-color-darker);
+            outline-offset: 2px;
+            box-shadow: 0 0 0 0.2rem rgba(26, 188, 156, .25);
+        }
+
         .loading-spinner {
             display: inline-block; width: 1em; height: 1em; vertical-align: -0.125em;
             border: .2em solid currentColor; border-right-color: transparent;
