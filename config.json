@@ -1,0 +1,22 @@
+{
+    "mikrotik": {
+        "host": "192.168.1.62",
+        "port": 8728,
+        "username": "justin",
+        "password": "Bang@1988",
+        "use_ssl": false,
+        "hotspot_login_url": "http://hotspot.setup/login"
+    },
+    "server": {
+        "host": "0.0.0.0",
+        "port": 5000,
+        "debug": true,
+        "log_file": "mikrotik_dashboard.log",
+        "log_level_console": "INFO",
+        "log_level_file": "INFO"
+    },
+    "app_admin": {
+        "username": "admin",
+        "password_hash": "scrypt:32768:8:1$8DrykRr3EgHqdDLF$702b7b3e0850bf3294d5cdf4d9f8951cacf0a50f820fa8dd83b457f4200bf1c195c6ac34502ddcdd8b834af856e7467a193ae780f29558ae9adb83ca956d2a6e"
+    }
+}
