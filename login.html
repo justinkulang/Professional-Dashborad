@@ -445,7 +445,29 @@
             });
         });
 
-        document.addEventListener('DOMContentLoaded', fetchTranslations);
+        // Theme Loading Logic for login.html
+        function applyLoginTheme(theme) {
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+            // No toggle UI on login page to update
+        }
+
+        const savedLoginTheme = localStorage.getItem('theme');
+        const prefersDarkLogin = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (savedLoginTheme) {
+            applyLoginTheme(savedLoginTheme);
+        } else if (prefersDarkLogin) {
+            applyLoginTheme('dark');
+        } else {
+            applyLoginTheme('light'); // Default to light
+        }
+        // End Theme Loading Logic
+
+        document.addEventListener('DOMContentLoaded', fetchTranslations); // Keep this, ensure theme logic runs before/with it or is independent
     </script>
 </body>
 </html>
