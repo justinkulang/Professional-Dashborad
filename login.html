@@ -222,6 +222,29 @@
             margin-right: 5px;
             color: var(--primary-color);
         }
+
+        @media (max-width: 400px) {
+            .login-container {
+                padding: 1.5rem; /* Reduce padding for very small screens */
+            }
+            .login-container h2 {
+                font-size: 1.7rem;
+            }
+            .login-container .subtitle {
+                font-size: 0.9em;
+                margin-bottom: 1.5rem;
+            }
+            .form-group input[type="text"],
+            .form-group input[type="number"],
+            .form-group input[type="password"],
+            .login-button {
+                padding: 0.75rem 0.9rem; /* Slightly reduce padding */
+                font-size: 0.95rem;
+            }
+            .login-footer {
+                font-size: 0.8em;
+            }
+        }
     </style>
 </head>
 <body>

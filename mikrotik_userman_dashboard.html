@@ -519,9 +519,73 @@
             body { flex-direction: column; }
             .sidebar { width: 100%; height: auto; flex-direction: row; align-items: center; overflow-x: auto; }
             .sidebar-nav { display: flex; flex-direction: row; }
-            .sidebar-header { display: none; }
+            .sidebar-header { display: none; } /* Keep IT Dad name hidden on small nav */
+            .sidebar-footer {
+                flex-direction: column; /* Stack footer items vertically for clarity in narrow bar */
+                align-items: center; /* Center them */
+                padding: 0.5rem;
+                gap: 0.5rem;
+            }
+            .sidebar-footer .theme-switch-wrapper { /* Ensure theme switch is also centered and spaced */
+                margin-top: 0.5rem;
+                padding-top: 0.5rem;
+                width: 100%; /* Allow it to take width for centering its content */
+                justify-content: center;
+            }
+            .sidebar-footer p { font-size: 0.8em; margin-bottom: 0.25rem; }
+            .sidebar-footer p strong { font-size: 0.9em; }
+
+
             .main-content { padding: 1rem; }
-            .page-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; /* Reduced gap */ }
+            .page-header h1 { font-size: 1.5rem; } /* Smaller page titles */
+            .page-header span { font-size: 0.8em; }
+
+            .panel, .stat-card { padding: 1rem; }
+            .panel-header { font-size: 1.1rem; margin-bottom: 1rem; padding-bottom: 0.75rem;}
+            .stat-card-info h3 { font-size: 1.3rem; }
+            .stat-card-info p { font-size: 0.8rem; }
+            .stat-card-icon { font-size: 1.8rem; margin-right: 0.8rem;}
+
+            .dashboard-grid { gap: 1rem; }
+            .form-grid { gap: 1rem; }
+            .form-group input, .form-group select, .form-group textarea { padding: 0.6rem 0.8rem; font-size: 0.9rem; }
+            .btn { padding: 0.6rem 1rem; font-size: 0.9rem; }
+            .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+
+            /* Table refinements */
+            .table-container { font-size: 0.85rem; /* Reduce base font for table container slightly */ }
+            th, td { padding: 0.5rem 0.4rem; /* Significantly reduce padding */ font-size: 0.8rem; }
+
+            /* Make form buttons and modal footer buttons full width and stacked */
+            #createUserForm button[type="submit"],
+            #bulkCreateUserForm button[type="submit"],
+            #configForm button, /* Both test and save */
+            .modal-footer .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            .modal-footer .btn:last-child { margin-bottom: 0; }
+            .modal-footer { flex-direction: column; }
+            #configForm div[style*="gap"] { flex-direction: column; } /* Stack test/save in settings */
+
+            .modal-dialog { margin: 0.5rem auto; width: calc(100% - 1rem); }
+            .modal-header, .modal-body, .modal-footer { padding: 0.75rem; }
+            .modal-header .modal-title { font-size: 1.1rem; }
+
+            /* Specific column hiding for users table - example for 'Comment' */
+            /* This requires adding a class like 'hide-on-mobile' to th/td in JS or HTML */
+            /* For now, this is a placeholder to show how it would be done. */
+            /* .users-table-comment-col { display: none; } */
+
+            /* Analytics page adjustments */
+            .analytics-grid { margin-top: 1rem; gap: 1rem; }
+            #refreshAnalyticsButton { margin-left: 0 !important; width: 100%; margin-top: 1rem; }
+            .page-header > div:first-child { /* Ensure title and subtitle stack nicely */
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
