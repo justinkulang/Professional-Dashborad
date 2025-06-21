@@ -2099,6 +2099,15 @@ async function loadAnalyticsData() {
         profileUsageChartInstance.destroy();
     }
     const profileData = data.data_usage_by_profile || {};
+    const totalProfileUsage = Object.values(profileData).reduce((sum, val) => sum + val, 0);
+
+    // Enhanced color palette for Pie chart - works well on light/dark
+    const pieChartColors = [
+        '#1abc9c', '#3498db', '#9b59b6', '#f1c40f', '#e74c3c',
+        '#2ecc71', '#e67e22', '#34495e', '#7f8c8d', '#16a085',
+        '#2980b9', '#8e44ad', '#f39c12', '#c0392b', '#27ae60'
+    ];
+
     if (Object.keys(profileData).length === 0) {
         profileChartEmptyState.style.display = 'flex'; // Show empty state
     } else {
@@ -2110,10 +2119,7 @@ async function loadAnalyticsData() {
                 datasets: [{
                     label: 'Data Usage',
                     data: Object.values(profileData),
-                    backgroundColor: [
-                        '#1abc9c', '#2ecc71', '#3498db', '#f1c40f', '#e74c3c',
-                        '#9b59b6', '#34495e', '#7f8c8d', '#16a085', '#27ae60'
-                    ],
+                    backgroundColor: pieChartColors,
                     hoverOffset: 4
                 }]
             },
@@ -2122,7 +2128,11 @@ async function loadAnalyticsData() {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        labels: { color: labelColor }
+                        labels: { color: labelColor },
+                        onClick: (e, legendItem, legend) => { // Default behavior + update
+                            Chart.defaults.plugins.legend.onClick(e, legendItem, legend);
+                            // Could add custom logic here if needed after a legend item click
+                        }
                     },
                     tooltip: {
                         backgroundColor: tooltipBgColor,
@@ -2130,10 +2140,10 @@ async function loadAnalyticsData() {
                         bodyColor: tooltipBodyColor,
                         callbacks: {
                             label: function(context) {
-                                let label = context.label || '';
-                                if (label) { label += ': '; }
-                                if (context.parsed !== null) { label += formatBytes(context.parsed); }
-                                return label;
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const percentage = totalProfileUsage > 0 ? ((value / totalProfileUsage) * 100).toFixed(1) : 0;
+                                return `${label}: ${formatBytes(value)} (${percentage}%)`;
                             }
                         }
                     }
@@ -2158,8 +2168,11 @@ async function loadAnalyticsData() {
                 labels: topUsers.map(u => u.name),
                 datasets: [{
                     label: 'Total Data Usage',
-                    data: topUsers.map(u => u.total_data),
-                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#1abc9c'
+                    data: topUsers.map(u => u.total_data), // Assuming topUsers elements have bytes_in, bytes_out
+                    bytesIn: topUsers.map(u => u.bytes_in || 0), // Store for tooltip
+                    bytesOut: topUsers.map(u => u.bytes_out || 0), // Store for tooltip
+                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#1abc9c',
+                    hoverBackgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color-darker').trim() || '#16a085'
                 }]
             },
             options: {
@@ -2189,10 +2202,15 @@ async function loadAnalyticsData() {
                         bodyColor: tooltipBodyColor,
                         callbacks: {
                             label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) { label += ': '; }
-                                if (context.parsed.y !== null) { label += formatBytes(context.parsed.y); }
-                                return label;
+                                const dataset = context.dataset;
+                                const index = context.dataIndex;
+                                const totalUsage = formatBytes(dataset.data[index]);
+                                const bytesIn = formatBytes(dataset.bytesIn[index]);
+                                const bytesOut = formatBytes(dataset.bytesOut[index]);
+
+                                let tooltipLines = [`Total: ${totalUsage}`];
+                                tooltipLines.push(`In: ${bytesIn} / Out: ${bytesOut}`);
+                                return tooltipLines;
                             }
                         }
                     }
@@ -2202,32 +2220,33 @@ async function loadAnalyticsData() {
     }
 }
 
-// Listen for theme changes to redraw charts
+// Listen for theme changes to update chart options and re-render
 document.addEventListener('themeChanged', function(e) {
     if (analyticsDataLoaded && document.getElementById('analytics').classList.contains('active')) {
-        // If analytics tab is active and data has been loaded, reload analytics to update chart colors
-        // A more optimized way would be to just update chart options and call chart.update()
-        // but for simplicity in this context, reloading the data will also re-render charts.
-        // However, to avoid re-fetching, we can just call a chart update function if data is cached.
-        // For now, let's assume `loadAnalyticsData` can be called to re-render with current theme.
-        // This requires `apiCall('/analytics/basic_summary')` to be efficient or data to be cached locally.
-        // A better approach:
+        const isDark = document.body.classList.contains('dark-mode');
+        const newGridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+        const newLabelColor = isDark ?
+            getComputedStyle(document.documentElement).getPropertyValue('--theme-text-secondary').trim() :
+            getComputedStyle(document.documentElement).getPropertyValue('--theme-text-primary').trim();
+        const newTooltipBgColor = isDark ? '#2c3e50' : '#fff';
+        const newTooltipTitleColor = isDark ? '#ecf0f1' : '#2c3e50';
+        const newTooltipBodyColor = isDark ? '#ecf0f1' : '#2c3e50';
+
         if (profileUsageChartInstance) {
-            const isDark = document.body.classList.contains('dark-mode');
-            const newGridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-            const newLabelColor = isDark ? getComputedStyle(document.documentElement).getPropertyValue('--theme-text-secondary').trim() : getComputedStyle(document.documentElement).getPropertyValue('--theme-text-primary').trim();
             profileUsageChartInstance.options.plugins.legend.labels.color = newLabelColor;
-            // Pie charts don't have scales/grids like bar charts by default to update here.
+            profileUsageChartInstance.options.plugins.tooltip.backgroundColor = newTooltipBgColor;
+            profileUsageChartInstance.options.plugins.tooltip.titleColor = newTooltipTitleColor;
+            profileUsageChartInstance.options.plugins.tooltip.bodyColor = newTooltipBodyColor;
             profileUsageChartInstance.update();
         }
         if (topUsersChartInstance) {
-            const isDark = document.body.classList.contains('dark-mode');
-            const newGridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-            const newLabelColor = isDark ? getComputedStyle(document.documentElement).getPropertyValue('--theme-text-secondary').trim() : getComputedStyle(document.documentElement).getPropertyValue('--theme-text-primary').trim();
             topUsersChartInstance.options.scales.y.grid.color = newGridColor;
             topUsersChartInstance.options.scales.y.ticks.color = newLabelColor;
             topUsersChartInstance.options.scales.x.ticks.color = newLabelColor;
             topUsersChartInstance.options.plugins.legend.labels.color = newLabelColor;
+            topUsersChartInstance.options.plugins.tooltip.backgroundColor = newTooltipBgColor;
+            topUsersChartInstance.options.plugins.tooltip.titleColor = newTooltipTitleColor;
+            topUsersChartInstance.options.plugins.tooltip.bodyColor = newTooltipBodyColor;
             topUsersChartInstance.update();
         }
     }
