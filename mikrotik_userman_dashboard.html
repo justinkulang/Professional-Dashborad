@@ -7,76 +7,230 @@
     <title>Hotspot Manager v2</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
+<style>
         :root {
-            /* Modernized Color Palette - Example: Teal/Turquoise scheme */
-            --primary-color: #1abc9c; /* Teal */
-            --primary-color-darker: #16a085; /* Darker Teal */
-            --secondary-color: #7f8c8d; /* Asbestos */
-            --success-color: #2ecc71; /* Emerald */
-            --danger-color: #e74c3c; /* Alizarin */
-            --warning-color: #f39c12; /* Orange */
-            --info-color: #3498db; /* Peter River */
-            --light-color: #ecf0f1; /* Clouds - for backgrounds */
-            --dark-color: #2c3e50; /* Midnight Blue - for text */
-            --font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern, clean font */
-            --border-radius: 0.25rem; /* Slightly smaller border radius for a sharper look */
-            --box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08); /* Softer shadow */
+            /* Core Palette (mostly unchanged by theme switching) */
+            --primary-color: #1abc9c;
+            --primary-color-darker: #16a085;
+            --primary-color-lightest: #e8f8f5; /* For focus states */
+            --secondary-color-static: #7f8c8d;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --dark-color-static: #2c3e50;
+            --light-color-static: #ecf0f1;
+
+            --font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --border-radius: 0.25rem;
+
+            /* Light Theme Defaults (Initial Definition) */
+            --theme-bg-main: var(--light-color-static);
+            --theme-bg-sidebar: #ffffff;
+            --theme-bg-panel: #ffffff;
+            --theme-bg-table-header: #f9fafb;
+            --theme-bg-table-row-hover: #f0f8ff;
+            --theme-bg-input: #ffffff;
+            --theme-text-primary: var(--dark-color-static);
+            --theme-text-secondary: var(--secondary-color-static);
+            --theme-text-nav-link: #495057;
+            --theme-text-nav-link-active: #ffffff;
+            --theme-text-on-primary-btn: var(--dark-color-static);
+            --theme-text-on-colored-bg: #ffffff;
+            --theme-border-light: #dee2e6;
+            --theme-border-panel: #bdc3c7;
+            --theme-border-table: #ecf0f1;
+            --theme-box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
+            --theme-stat-card-icon-color: var(--primary-color);
+            --theme-modal-header-border: #dee2e6;
+            --theme-modal-footer-border: #dee2e6;
+            --theme-alert-success-bg: #d1e7dd;
+            --theme-alert-success-text: var(--dark-color-static);
+            --theme-alert-success-border: #badbcc;
+            --theme-alert-danger-bg: #f8d7da;
+            --theme-alert-danger-text: var(--dark-color-static);
+            --theme-alert-danger-border: #f5c2c7;
+            --theme-empty-state-icon-color: var(--primary-color);
+            --theme-empty-state-icon-opacity: 0.5;
+            --theme-empty-state-td-bg: #fff; /* Table cell background for empty state in light mode */
+            --theme-empty-state-row-hover-bg: #fff; /* Prevent hover on empty state row in light mode */
+            --theme-sidebar-footer-text-color: var(--secondary-color-static);
+            --theme-sidebar-footer-strong-text-color: var(--dark-color-static);
+            --theme-sidebar-footer-border-color: var(--theme-border-light);
+            --theme-chart-empty-state-bg: rgba(255,255,255,0.9); /* Light overlay for empty chart in light mode */
         }
+
+        /* Dark Theme Overrides */
+        body.dark-mode {
+            --theme-bg-main: #2c3e50;
+            --theme-bg-sidebar: #34495e;
+            --theme-bg-panel: #3b5166;
+            --theme-bg-table-header: #415a72;
+            --theme-bg-table-row-hover: #4a657f;
+            --theme-bg-input: #415a72;
+            --theme-text-primary: #ecf0f1;
+            --theme-text-secondary: #bdc3c7;
+            --theme-text-nav-link: #e0e0e0;
+            --theme-text-on-primary-btn: #ffffff;
+            --theme-border-light: #4a657f;
+            --theme-border-panel: #526d82;
+            --theme-border-table: #4a657f;
+            --theme-box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.25);
+            --theme-modal-header-border: var(--theme-border-light);
+            --theme-modal-footer-border: var(--theme-border-light);
+            --theme-alert-success-bg: #27ae60;
+            --theme-alert-success-text: #ffffff;
+            --theme-alert-success-border: #2ecc71;
+            --theme-alert-danger-bg: #c0392b;
+            --theme-alert-danger-text: #ffffff;
+            --theme-alert-danger-border: #e74c3c;
+            --theme-empty-state-icon-color: var(--primary-color-lightest);
+            --theme-empty-state-icon-opacity: 0.7;
+            --theme-empty-state-td-bg: var(--theme-bg-panel); /* Match panel bg for empty state in dark mode */
+            --theme-empty-state-row-hover-bg: var(--theme-bg-panel); /* Prevent hover on empty state row in dark mode */
+            --theme-sidebar-footer-text-color: var(--theme-text-secondary);
+            --theme-sidebar-footer-strong-text-color: var(--theme-text-primary);
+            --theme-sidebar-footer-border-color: var(--theme-border-light);
+            --theme-chart-empty-state-bg: rgba(44, 62, 80, 0.9); /* Darker overlay for empty chart in dark mode */
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: var(--font-family);
-            background-color: var(--light-color); /* Updated background */
-            color: var(--dark-color);
+            background-color: var(--theme-bg-main);
+            color: var(--theme-text-primary);
             display: flex;
             height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         .sidebar {
             width: 260px;
-            background-color: #ffffff; /* Pure white sidebar */
-            box-shadow: var(--box-shadow); /* Updated shadow */
+            background-color: var(--theme-bg-sidebar);
+            box-shadow: var(--theme-box-shadow);
             display: flex;
             flex-direction: column;
-            padding: 1.5rem 1rem; /* Adjusted padding */
-            transition: width 0.3s ease;
-            border-right: 1px solid #bdc3c7; /* Subtle border */
+            padding: 1.5rem 1rem;
+            transition: width 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            border-right: 1px solid var(--theme-border-panel);
         }
         .sidebar-header {
             text-align: center;
             padding-bottom: 1.5rem;
-            border-bottom: 1px solid var(--light-color); /* Lighter border */
+            border-bottom: 1px solid var(--theme-border-light);
             margin-bottom: 1rem;
+            transition: border-color 0.3s ease;
         }
         .sidebar-header h2 {
-            font-size: 1.75rem; /* Slightly larger */
-            color: var(--primary-color); /* Brand color for header */
-            font-weight: 700; /* Bolder */
+            font-size: 1.75rem;
+            color: var(--primary-color);
+            font-weight: 700;
         }
-        .sidebar-nav { flex-grow: 1; list-style: none; margin-top: 0; } /* Removed top margin */
+        .sidebar-nav { flex-grow: 1; list-style: none; margin-top: 0; }
         .sidebar-nav a {
             display: flex;
             align-items: center;
             padding: 0.8rem 1rem;
-            color: #495057;
+            color: var(--theme-text-nav-link);
             text-decoration: none;
             border-radius: var(--border-radius);
             margin-bottom: 0.5rem;
             transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         }
-        .sidebar-nav a:hover, .sidebar-nav a.active {
+        .sidebar-nav a:hover {
             background-color: var(--primary-color);
-            color: #fff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow for active/hover link */
+            color: var(--theme-text-nav-link-active);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        body.dark-mode .sidebar-nav a:hover {
+             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .sidebar-nav a.active {
-            background-color: var(--primary-color-darker); /* Use darker shade for active */
+            background-color: var(--primary-color-darker);
+            color: var(--theme-text-nav-link-active);
+            font-weight: 500;
         }
-        .sidebar-nav a i { width: 30px; text-align: center; font-size: 1.1rem; margin-right: 5px; } /* Added margin */
+        .sidebar-nav a i { width: 30px; text-align: center; font-size: 1.1rem; margin-right: 5px; }
+        .sidebar-footer {
+            text-align: center;
+            padding: 20px 10px;
+            font-size: 0.9em;
+            color: var(--theme-sidebar-footer-text-color);
+            border-top: 1px solid var(--theme-sidebar-footer-border-color);
+            margin-top: auto;
+            transition: color 0.3s ease, border-color 0.3s ease;
+        }
+        .sidebar-footer p strong {
+            color: var(--theme-sidebar-footer-strong-text-color);
+            transition: color 0.3s ease;
+        }
+        .sidebar-footer a { /* Ensure link color in footer adapts */
+            color: var(--primary-color);
+        }
+
+        /* Theme Toggle Switch */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--theme-sidebar-footer-border-color);
+            transition: border-color 0.3s ease;
+        }
+        .theme-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 26px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+        input:focus-visible + .slider {
+            box-shadow: 0 0 0 2px var(--theme-bg-sidebar), 0 0 0 4px var(--primary-color-lightest);
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+        .theme-switch-wrapper span { /* For the "Dark Mode" label text */
+             color: var(--theme-text-secondary);
+             transition: color 0.3s ease;
+        }
+
+
         .main-content {
             flex-grow: 1;
             padding: 2rem;
             overflow-y: auto;
-            background-color: var(--light-color); /* Ensure main content bg matches body */
+            background-color: var(--theme-bg-main);
+            transition: background-color 0.3s ease;
         }
         .page-header {
             display: flex;
@@ -84,191 +238,265 @@
             align-items: center;
             margin-bottom: 2rem;
             padding-bottom: 1rem;
-            border-bottom: 1px solid #bdc3c7; /* Consistent border */
+            border-bottom: 1px solid var(--theme-border-panel);
+            transition: border-color 0.3s ease;
         }
-        .page-header h1 { font-size: 1.8rem; color: var(--dark-color); font-weight: 600; } /* Adjusted size and weight */
-        #connectionStatus { padding: 0.5rem 1rem; border-radius: var(--border-radius); font-weight: 500; }
-        #connectionStatus.connected { background-color: var(--success-color); color: #fff; } /* Use theme success */
-        #connectionStatus.disconnected { background-color: var(--danger-color); color: #fff; } /* Use theme danger */
+        .page-header h1 { font-size: 1.8rem; color: var(--theme-text-primary); font-weight: 600; }
+        .page-header span { color: var(--theme-text-secondary); }
+
+        #connectionStatus { padding: 0.5rem 1rem; border-radius: var(--border-radius); font-weight: 500; transition: background-color 0.3s ease, color 0.3s ease; }
+        #connectionStatus.connected { background-color: var(--success-color); color: var(--theme-text-on-colored-bg); }
+        #connectionStatus.disconnected { background-color: var(--danger-color); color: var(--theme-text-on-colored-bg); }
+
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } } /* Made Y translation more subtle */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
         .stat-card {
-            background: #fff; padding: 1.5rem; border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow); display: flex; align-items: center;
-            border-left: 4px solid var(--primary-color); /* Accent border */
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            background: var(--theme-bg-panel); padding: 1.5rem; border-radius: var(--border-radius);
+            box-shadow: var(--theme-box-shadow); display: flex; align-items: center;
+            border-left: 4px solid var(--primary-color);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s ease;
         }
         .stat-card:hover {
             transform: translateY(-3px);
-            box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.12);
         }
-        .stat-card-icon { font-size: 2.2rem; margin-right: 1rem; color: var(--primary-color); } /* Slightly smaller icon */
-        .stat-card-info h3 { font-size: 1.75rem; font-weight: 600; color: var(--dark-color); } /* Bolder */
-        .stat-card-info p { color: var(--secondary-color); font-size: 0.9rem; }
+        body.dark-mode .stat-card:hover {
+            box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.3);
+        }
+        .stat-card-icon { font-size: 2.2rem; margin-right: 1rem; color: var(--theme-stat-card-icon-color); }
+        .stat-card-info h3 { font-size: 1.75rem; font-weight: 600; color: var(--theme-text-primary); }
+        .stat-card-info p { color: var(--theme-text-secondary); font-size: 0.9rem; }
+
         .panel {
-            background: #fff; padding: 1.5rem; /* Adjusted padding */
-            border-radius: var(--border-radius); box-shadow: var(--box-shadow);
+            background: var(--theme-bg-panel); padding: 1.5rem;
+            border-radius: var(--border-radius); box-shadow: var(--theme-box-shadow);
             margin-bottom: 2rem;
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s ease;
         }
         .panel:hover {
             transform: translateY(-3px);
-            box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.12);
+        }
+        body.dark-mode .panel:hover {
+            box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.3);
         }
         .panel-header {
             margin-bottom: 1.5rem; padding-bottom: 1rem;
-            border-bottom: 1px solid var(--light-color); /* Lighter border */
-            font-size: 1.25rem; font-weight: 600; color: var(--dark-color);
+            border-bottom: 1px solid var(--theme-border-light);
+            font-size: 1.25rem; font-weight: 600; color: var(--theme-text-primary);
+            transition: border-color 0.3s ease;
         }
+        .panel-header i { color: var(--primary-color) !important; /* Ensure panel header icons use brand color */ }
+
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
-        .form-group { margin-bottom: 1.25rem; } /* Adjusted margin */
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #555; } /* Slightly lighter label */
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--theme-text-secondary); }
         .form-group input, .form-group select, .form-group textarea {
-            width: 100%; padding: 0.75rem 1rem; /* Increased padding for better touch targets */
-            border: 1px solid #bdc3c7; /* Consistent border */
-            border-radius: var(--border-radius); font-size: 0.95rem; /* Adjusted font size */
-            transition: border-color 0.2s, box-shadow 0.2s;
-            background-color: #fff; /* Ensure background is white */
+            width: 100%; padding: 0.75rem 1rem;
+            border: 1px solid var(--theme-border-panel);
+            border-radius: var(--border-radius); font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s ease, color 0.3s ease;
+            background-color: var(--theme-bg-input);
+            color: var(--theme-text-primary);
+        }
+        .form-group select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%232c3e50' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e"); /* Dark arrow for light mode */
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 0.8em 0.8em;
+            padding-right: 2.5rem; /* Ensure space for arrow */
+        }
+        .form-group input::placeholder, .form-group textarea::placeholder {
+            color: var(--theme-text-secondary);
+            opacity: 0.8;
         }
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             outline: none; border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(26, 188, 156, .25); /* Teal focus ring */
+            box-shadow: 0 0 0 0.2rem rgba(26, 188, 156, .25);
         }
+        body.dark-mode .form-group select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23bdc3c7' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e"); /* Light arrow for dark mode */
+            /* background-repeat, position, size are inherited or can be re-specified if different */
+        }
+
         .btn {
             display: inline-flex; align-items: center; gap: 0.5rem;
-            padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 500; /* Adjusted padding & font */
+            padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 500;
             border: 1px solid transparent; border-radius: var(--border-radius);
-            cursor: pointer; text-decoration: none; transition: all 0.2s;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Subtle shadow on buttons */
+            cursor: pointer; text-decoration: none;
+            transition: all 0.2s ease-in-out, background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            box-shadow: var(--theme-box-shadow);
         }
-        .btn:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.1); } /* Hover effect */
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0.3rem 0.8rem rgba(0,0,0,0.15);
+        }
+        body.dark-mode .btn:hover {
+            box-shadow: 0 0.3rem 0.8rem rgba(0,0,0,0.35);
+        }
 
         .btn:active {
-            transform: scale(0.98) translateY(0px); /* Scale down and remove hover lift */
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.15); /* Inner shadow */
+            transform: scale(0.98) translateY(0px);
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
+        }
+        body.dark-mode .btn:active {
+             box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
         }
 
-        .btn:focus-visible { /* Using :focus-visible for better accessibility, falls back to :focus */
+        .btn:focus-visible {
             outline: 2px solid var(--primary-color-darker);
             outline-offset: 2px;
             box-shadow: 0 0 0 0.2rem rgba(26, 188, 156, .25);
         }
 
-        .btn-primary { background-color: var(--primary-color); color: var(--dark-color); border-color: var(--primary-color-darker); } /* Dark text for contrast */
+        .btn-primary { background-color: var(--primary-color); color: var(--theme-text-on-primary-btn); border-color: var(--primary-color-darker); }
         .btn-primary:hover { background-color: var(--primary-color-darker); color: #fff; border-color: var(--primary-color-darker); }
-        .btn-primary:active { background-color: var(--primary-color); color: var(--dark-color);} /* Revert to non-hover colors but keep pressed effect */
+        body.dark-mode .btn-primary:active { background-color: var(--primary-color); color: #fff;}
+        body:not(.dark-mode) .btn-primary:active { background-color: var(--primary-color); color: var(--dark-color-static);}
 
-        .btn-danger { background-color: var(--danger-color); color: #fff; border-color: var(--danger-color); }
-        .btn-danger:hover { background-color: #c0392b; border-color: #c0392b; }
-        /* Ensure white text on danger has enough contrast. #e74c3c with #fff is ~3.75:1. Acceptable if text is bold/large. */
+        .btn-danger { background-color: var(--danger-color); color: var(--theme-text-on-colored-bg); border-color: var(--danger-color); }
+        .btn-danger:hover { background-color: #c0392b; border-color: #c0392b; color: #fff; }
+
+        .btn-success { background-color: var(--success-color); color: var(--theme-text-on-colored-bg); border-color: var(--success-color); }
+        .btn-success:hover { background-color: #27ae60; border-color: #27ae60; color: #fff; }
+
+        .btn-info { background-color: var(--info-color); color: #fff; border-color: var(--info-color); }
+        .btn-info:hover { background-color: #2980b9; border-color: #2980b9; color: #fff; }
+
         .btn-danger, .btn-success, #connectionStatus.connected, #connectionStatus.disconnected, .status-badge {
-             font-weight: 500; /* Make text slightly bolder for better contrast if borderline */
+             font-weight: 500;
         }
-
-        .btn-success { background-color: var(--success-color); color: #fff; border-color: var(--success-color); }
-        .btn-success:hover { background-color: #27ae60; border-color: #27ae60; } /* Darker green */
-        /* White text on success-color (#2ecc71) is ~3.05:1. Acceptable if text is bold/large */
-
         .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.875rem; }
-        .table-container { overflow-x: auto; border: 1px solid #bdc3c7; border-radius: var(--border-radius); background-color: #fff; }
+
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid var(--theme-border-panel);
+            border-radius: var(--border-radius);
+            background-color: var(--theme-bg-panel);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
         table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        th, td { padding: 0.9rem 1rem; text-align: left; border-bottom: 1px solid #ecf0f1; vertical-align: middle; }
-        th { background-color: #f9fafb; font-weight: 600; color: var(--dark-color); }
-        tbody tr:hover { background-color: #f0f8ff; }
+        th, td { padding: 0.9rem 1rem; text-align: left; border-bottom: 1px solid var(--theme-border-table); vertical-align: middle; }
+        th { background-color: var(--theme-bg-table-header); font-weight: 600; color: var(--theme-text-primary); transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+        tbody tr { transition: background-color 0.15s ease; }
+        tbody tr:hover { background-color: var(--theme-bg-table-row-hover); }
+
         .status-badge { padding: 0.3em 0.6em; font-size: 80%; line-height: 1; text-align: center; white-space: nowrap; vertical-align: baseline; border-radius: var(--border-radius); }
-        .status-active { color: #fff; background-color: var(--success-color); } /* Contrast ~3.05:1, made bolder */
-        .status-disabled { color: #fff; background-color: var(--secondary-color); } /* #7f8c8d with white is ~2.5:1 - NEEDS FIX */
-
-        /* Fix for status-disabled contrast */
-        .status-disabled { color: var(--dark-color); background-color: #bdc3c7; } /* Asbestos (lighter grey) bg, dark text. Contrast > 7:1 */
-
+        .status-active { color: var(--theme-text-on-colored-bg); background-color: var(--success-color); }
+        .status-disabled { color: var(--theme-text-primary); background-color: var(--secondary-color-static); }
+        body.dark-mode .status-disabled { color: var(--theme-text-primary); background-color: #566573; }
 
         .modal {
             display: none; position: fixed; z-index: 1050; top: 0; left: 0; width: 100%; height: 100%;
-            overflow: hidden; background-color: rgba(0,0,0,0.5);
+            overflow: hidden; background-color: rgba(0,0,0,0.6);
+        }
+        body.dark-mode .modal {
+            background-color: rgba(0,0,0,0.75);
         }
         .modal-dialog { position: relative; width: auto; max-width: 600px; margin: 1.75rem auto; }
-        .modal-content { background-color: #fff; border-radius: var(--border-radius); box-shadow: var(--box-shadow); }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--light-color); } /* Lighter border */
-        .modal-body { padding: 1.5rem; }
-        .modal-footer { display: flex; justify-content: flex-end; gap: 0.5rem; padding: 1rem 1.5rem; border-top: 1px solid var(--light-color); } /* Lighter border */
+        .modal-content {
+            background-color: var(--theme-bg-panel);
+            border-radius: var(--border-radius);
+            box-shadow: var(--theme-box-shadow);
+            border: 1px solid var(--theme-border-panel);
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--theme-modal-header-border); transition: border-color 0.3s ease; }
+        .modal-header .modal-title { color: var(--theme-text-primary); }
+        .modal-body { padding: 1.5rem; color: var(--theme-text-primary); }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 0.5rem; padding: 1rem 1.5rem; border-top: 1px solid var(--theme-modal-footer-border); transition: border-color 0.3s ease; }
         .close-button {
-            background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--secondary-color);
+            background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--theme-text-secondary);
             transition: color 0.2s ease-in-out;
         }
-        .close-button:hover, .close-button:focus { color: var(--dark-color); }
+        .close-button:hover, .close-button:focus { color: var(--theme-text-primary); }
+
         .loading-spinner {
             display: inline-block; width: 1rem; height: 1rem; vertical-align: text-bottom;
             border: .2em solid currentColor; border-right-color: transparent;
             border-radius: 50%; animation: spinner-border .75s linear infinite;
         }
         @keyframes spinner-border { to { transform: rotate(360deg); } }
-        .alert { padding: 1rem; margin-bottom: 1rem; border: 1px solid transparent; border-radius: var(--border-radius); display: none; font-weight: 500; }
-        .alert-success { color: var(--dark-color); background-color: #d1e7dd; border-color: #badbcc; } /* Consistent with login.html */
-        .alert-danger { color: var(--dark-color); background-color: #f8d7da; border-color: #f5c2c7; } /* Consistent with login.html */
 
-        /* Sidebar active link text contrast */
+        .alert {
+            padding: 1rem; margin-bottom: 1rem;
+            border: 1px solid transparent; border-radius: var(--border-radius);
+            display: none; font-weight: 500;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        .alert-success {
+            color: var(--theme-alert-success-text); background-color: var(--theme-alert-success-bg); border-color: var(--theme-alert-success-border);
+        }
+        .alert-danger {
+            color: var(--theme-alert-danger-text); background-color: var(--theme-alert-danger-bg); border-color: var(--theme-alert-danger-border);
+        }
+
         .sidebar-nav a.active {
             background-color: var(--primary-color-darker);
-            color: #fff; /* White on #16a085 is ~3.54:1. Let's try a very light grey or ensure text is bolded sufficiently */
-            font-weight: 500; /* Bolder text for active link */
+            color: var(--theme-text-nav-link-active);
+            font-weight: 500;
         }
-        .sidebar-nav a:focus-visible { /* For sidebar links */
+        .sidebar-nav a:focus-visible {
             outline: 2px solid var(--primary-color-darker);
-            outline-offset: -2px; /* Inset slightly for better look on sidebar items */
-            background-color: var(--primary-color-lightest, #e8f8f5); /* A very light teal for focus bg if desired */
+            outline-offset: -2px;
+            background-color: var(--primary-color-lightest, #e8f8f5);
             color: var(--primary-color-darker);
+        }
+        body.dark-mode .sidebar-nav a:focus-visible {
+            background-color: var(--primary-color);
+            color: #fff;
         }
 
         /* Empty State Styles */
         .empty-state-container {
             text-align: center;
-            padding: 3rem 1rem; /* Generous padding */
-            color: var(--secondary-color);
+            padding: 3rem 1rem;
+            color: var(--theme-text-secondary);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 100%; /* Ensure it takes full width of its container (e.g., a td) */
-            min-height: 200px; /* Give it some minimum height */
+            width: 100%;
+            min-height: 200px;
         }
-
         .empty-state-icon {
-            font-size: 3.5rem; /* Large icon */
-            color: var(--primary-color);
-            opacity: 0.5; /* Slightly more subtle icon */
+            font-size: 3.5rem;
+            color: var(--theme-empty-state-icon-color);
+            opacity: var(--theme-empty-state-icon-opacity);
             margin-bottom: 1.5rem;
         }
-
         .empty-state-title {
-            font-size: 1.25rem; /* Adjusted size */
-            color: var(--dark-color);
+            font-size: 1.25rem;
+            color: var(--theme-text-primary);
             font-weight: 600;
             margin-bottom: 0.75rem;
         }
-
         .empty-state-text {
-            font-size: 0.9rem; /* Adjusted size */
+            font-size: 0.9rem;
             line-height: 1.5;
             max-width: 400px;
             margin-bottom: 1.5rem;
         }
-
-        .empty-state-action {
-            /* Styling for the optional action button, inherits .btn styles */
-        }
-
-        /* Specific styling for empty states within tables */
         td.empty-state-td {
-            border-bottom: none !important; /* Remove bottom border if it's the only 'row' */
-            background-color: #fff; /* Ensure it has a white background in tables */
+            border-bottom: none !important;
+            background-color: var(--theme-empty-state-td-bg) !important;
+            transition: background-color 0.3s ease !important;
         }
-        tr.empty-state-row:hover { /* Prevent hover effect on the empty state row itself */
-            background-color: #fff !important;
+        tr.empty-state-row:hover td.empty-state-td {
+            background-color: var(--theme-empty-state-row-hover-bg) !important;
         }
 
+        .chart-container div.empty-state-container {
+             background-color: var(--theme-chart-empty-state-bg) !important;
+             min-height: 300px;
+             transition: background-color 0.3s ease;
+        }
 
         .analytics-grid {
             display: grid;
@@ -312,17 +540,25 @@
             <li><a href="#" class="nav-link" data-tab="settings"><i class="fas fa-cog"></i><span>Settings</span></a></li>
             <li><a href="#" id="logoutButton" class="nav-link"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
         </ul>
-        <div class="sidebar-footer" style="text-align: center; padding: 20px 10px; font-size: 0.9em; color: var(--secondary-color); border-top: 1px solid var(--light-color); margin-top: auto;">
-            <p style="margin-bottom: 8px; font-weight: 600; color: var(--dark-color); font-size:1em;">The IT Dad</p>
-            <p style="margin-bottom: 5px; font-size: 0.95em;"><i class="fas fa-phone-alt" style="margin-right: 5px; color: var(--primary-color);"></i>+(211) 923 616 820</p>
-            <p style="font-size: 0.95em;"><i class="fas fa-envelope" style="margin-right: 5px; color: var(--primary-color);"></i><a href="mailto:justinkulang@gmail.com" style="color: var(--primary-color); text-decoration: none;">justinkulang@gmail.com</a></p>
+        <div class="sidebar-footer">
+            <p><strong>The IT Dad</strong></p>
+            <p><i class="fas fa-phone-alt" style="margin-right: 5px; color: var(--primary-color);"></i>+(211) 923 616 820</p>
+            <p style="margin-bottom: 1rem;"><i class="fas fa-envelope" style="margin-right: 5px; color: var(--primary-color);"></i><a href="mailto:justinkulang@gmail.com" style="color: var(--primary-color); text-decoration: none;">justinkulang@gmail.com</a></p>
+
+            <div class="theme-switch-wrapper">
+                <label class="theme-switch" for="themeToggleCheckbox" aria-label="Toggle dark mode">
+                    <input type="checkbox" id="themeToggleCheckbox" />
+                    <span class="slider round"></span>
+                </label>
+                <span style="margin-left: 0.75rem;" id="themeToggleLabel">Light Mode</span>
+            </div>
         </div>
     </aside>
     <main class="main-content">
         <div class="page-header">
             <div>
                 <h1 id="pageTitle">Dashboard</h1>
-                <span style="font-size: 0.9em; color: var(--secondary-color);">Mikrotik Hotspot Management</span>
+                <span>Mikrotik Hotspot Management</span>
             </div>
             <div id="connectionStatus" class="disconnected"><i class="fas fa-exclamation-triangle"></i><span>Connecting...</span></div>
         </div>
@@ -380,7 +616,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td colspan="9" style="text-align: center;">Loading users...</td></tr>
+                            <tr class="empty-state-row"><td colspan="9" class="empty-state-td"><div class="empty-state-container" style="min-height: 200px;"><div class="loading-spinner" style="font-size: 1.8em; margin-bottom: 1.2rem; color: var(--primary-color);"></div><h5 class="empty-state-title" style="margin-bottom: 0.5rem;">Loading users...</h5><p class="empty-state-text">Please wait while we fetch the user data from the router.</p></div></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -480,7 +716,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td colspan="7" style="text-align: center;">Loading sessions...</td></tr>
+                             <tr class="empty-state-row"><td colspan="7" class="empty-state-td"><div class="empty-state-container" style="min-height: 200px;"><div class="loading-spinner" style="font-size: 1.8em; margin-bottom: 1.2rem; color: var(--primary-color);"></div><h5 class="empty-state-title" style="margin-bottom: 0.5rem;">Loading sessions...</h5><p class="empty-state-text">Please wait while we fetch active session data.</p></div></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -500,7 +736,7 @@
                     <h3 class="panel-header">Data Usage by Profile</h3>
                     <div class="chart-container">
                         <canvas id="profileUsageChart"></canvas>
-                        <div id="profileUsageChartEmptyState" class="empty-state-container" style="display: none; position: absolute; top: 0; left: 0; background-color: rgba(255,255,255,0.9); min-height: 300px;">
+                        <div id="profileUsageChartEmptyState" class="empty-state-container" style="display: none; position: absolute; top: 0; left: 0; min-height: 300px;">
                             <div class="empty-state-icon"><i class="fas fa-chart-pie"></i></div>
                             <h5 class="empty-state-title">No Profile Data</h5>
                             <p class="empty-state-text">No data usage by profile to display currently.</p>
@@ -511,7 +747,7 @@
                     <h3 class="panel-header">Top 10 Users by Data Usage</h3>
                      <div class="chart-container">
                         <canvas id="topUsersChart"></canvas>
-                        <div id="topUsersChartEmptyState" class="empty-state-container" style="display: none; position: absolute; top: 0; left: 0; background-color: rgba(255,255,255,0.9); min-height: 300px;">
+                        <div id="topUsersChartEmptyState" class="empty-state-container" style="display: none; position: absolute; top: 0; left: 0; min-height: 300px;">
                             <div class="empty-state-icon"><i class="fas fa-users"></i></div>
                             <h5 class="empty-state-title">No User Data</h5>
                             <p class="empty-state-text">No user data usage to display for the top 10 chart.</p>
@@ -523,7 +759,7 @@
         
         <div id="maintenance" class="tab-content" role="tabpanel" aria-labelledby="tab-maintenance">
             <div class="panel">
-                <h3 class="panel-header"><i class="fas fa-id-badge" style="margin-right: 8px; color: var(--primary-color);"></i>User Profiles</h3>
+                <h3 class="panel-header"><i class="fas fa-id-badge" style="margin-right: 8px;"></i>User Profiles</h3>
                 <button class="btn btn-success" style="margin-bottom: 1rem;" onclick="openProfileModal()"><i class="fas fa-plus"></i> Add Profile</button>
                 <div class="table-container">
                     <table id="profilesTable">
@@ -533,13 +769,13 @@
                 </div>
             </div>
             <div class="panel">
-                <h3 class="panel-header"><i class="fas fa-broom" style="margin-right: 8px; color: var(--primary-color);"></i>Cleanup</h3>
+                <h3 class="panel-header"><i class="fas fa-broom" style="margin-right: 8px;"></i>Cleanup</h3>
                 <p>Automatically find and delete users who have used up their time or data allowance.</p>
                 <button class="btn btn-danger" onclick="deleteExpiredUsers()"><i class="fas fa-trash-alt"></i> Delete Expired Users</button>
             </div>
 
             <div class="panel">
-                <h3 class="panel-header"><i class="fas fa-user-tag" style="margin-right: 8px; color: var(--primary-color);"></i>Delete Users by Profile</h3>
+                <h3 class="panel-header"><i class="fas fa-user-tag" style="margin-right: 8px;"></i>Delete Users by Profile</h3>
                 <div class="form-group">
                     <label for="deleteByProfileSelect">Select Profile to Delete Users From:</label>
                     <select id="deleteByProfileSelect"></select> 
@@ -548,7 +784,7 @@
             </div>
 
             <div class="panel">
-                <h3 class="panel-header"><i class="fas fa-user-check" style="margin-right: 8px; color: var(--primary-color);"></i>Delete Users by Active Status</h3>
+                <h3 class="panel-header"><i class="fas fa-user-check" style="margin-right: 8px;"></i>Delete Users by Active Status</h3>
                 <div class="form-group">
                     <label for="deleteByStatusSelect">Select User Status to Delete:</label>
                     <select id="deleteByStatusSelect"> 
@@ -666,6 +902,49 @@ const logger = { // Simple logger
 
 // --- Init & Navigation ---
 document.addEventListener('DOMContentLoaded', () => {
+    // Theme Toggle Logic
+    const themeToggle = document.getElementById('themeToggleCheckbox');
+    const themeToggleLabel = document.getElementById('themeToggleLabel');
+    const body = document.body;
+
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            body.classList.add('dark-mode');
+            if (themeToggle) themeToggle.checked = true;
+            if (themeToggleLabel) themeToggleLabel.textContent = 'Dark Mode';
+        } else {
+            body.classList.remove('dark-mode');
+            if (themeToggle) themeToggle.checked = false;
+            if (themeToggleLabel) themeToggleLabel.textContent = 'Light Mode';
+        }
+        localStorage.setItem('theme', theme);
+        // Dispatch a custom event that charts can listen to for theme changes
+        document.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: theme } }));
+    }
+
+    if (themeToggle) {
+        themeToggle.addEventListener('change', () => {
+            if (themeToggle.checked) {
+                applyTheme('dark');
+            } else {
+                applyTheme('light');
+            }
+        });
+    }
+
+    // Load saved theme or OS preference
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme) {
+        applyTheme(savedTheme);
+    } else if (prefersDark) {
+        applyTheme('dark');
+    } else {
+        applyTheme('light'); // Default to light
+    }
+    // End Theme Toggle Logic
+
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', e => {
             e.preventDefault();
@@ -1742,6 +2021,13 @@ async function loadAnalyticsData() {
 
     const profileChartEmptyState = document.getElementById('profileUsageChartEmptyState');
     const topUsersChartEmptyState = document.getElementById('topUsersChartEmptyState');
+
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+    const labelColor = isDarkMode ? getComputedStyle(document.documentElement).getPropertyValue('--theme-text-secondary').trim() : getComputedStyle(document.documentElement).getPropertyValue('--theme-text-primary').trim();
+    const tooltipBgColor = isDarkMode ? '#2c3e50' : '#fff';
+    const tooltipTitleColor = isDarkMode ? '#ecf0f1' : '#2c3e50';
+    const tooltipBodyColor = isDarkMode ? '#ecf0f1' : '#2c3e50';
     
     // Render Profile Usage Chart (Pie)
     const profileCtx = document.getElementById('profileUsageChart').getContext('2d');
@@ -1771,7 +2057,13 @@ async function loadAnalyticsData() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
+                    legend: {
+                        labels: { color: labelColor }
+                    },
                     tooltip: {
+                        backgroundColor: tooltipBgColor,
+                        titleColor: tooltipTitleColor,
+                        bodyColor: tooltipBodyColor,
                         callbacks: {
                             label: function(context) {
                                 let label = context.label || '';
@@ -1793,9 +2085,9 @@ async function loadAnalyticsData() {
     }
     const topUsers = data.all_users_sorted_by_data ? data.all_users_sorted_by_data.slice(0, 10) : [];
     if (topUsers.length === 0) {
-        topUsersChartEmptyState.style.display = 'flex'; // Show empty state
+        topUsersChartEmptyState.style.display = 'flex';
     } else {
-        topUsersChartEmptyState.style.display = 'none'; // Hide empty state
+        topUsersChartEmptyState.style.display = 'none';
         topUsersChartInstance = new Chart(topUsersCtx, {
             type: 'bar',
             data: {
@@ -1803,7 +2095,7 @@ async function loadAnalyticsData() {
                 datasets: [{
                     label: 'Total Data Usage',
                     data: topUsers.map(u => u.total_data),
-                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#1abc9c' // Use theme color
+                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#1abc9c'
                 }]
             },
             options: {
@@ -1812,11 +2104,25 @@ async function loadAnalyticsData() {
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: { callback: function(value) { return formatBytes(value); } }
+                        grid: { color: gridColor },
+                        ticks: {
+                            color: labelColor,
+                            callback: function(value) { return formatBytes(value); }
+                        }
+                    },
+                    x: {
+                        grid: { display: false }, // Often X grid is not needed for bar charts
+                        ticks: { color: labelColor }
                     }
                 },
                 plugins: {
+                    legend: {
+                        labels: { color: labelColor }
+                    },
                     tooltip: {
+                        backgroundColor: tooltipBgColor,
+                        titleColor: tooltipTitleColor,
+                        bodyColor: tooltipBodyColor,
                         callbacks: {
                             label: function(context) {
                                 let label = context.dataset.label || '';
@@ -1831,6 +2137,37 @@ async function loadAnalyticsData() {
         });
     }
 }
+
+// Listen for theme changes to redraw charts
+document.addEventListener('themeChanged', function(e) {
+    if (analyticsDataLoaded && document.getElementById('analytics').classList.contains('active')) {
+        // If analytics tab is active and data has been loaded, reload analytics to update chart colors
+        // A more optimized way would be to just update chart options and call chart.update()
+        // but for simplicity in this context, reloading the data will also re-render charts.
+        // However, to avoid re-fetching, we can just call a chart update function if data is cached.
+        // For now, let's assume `loadAnalyticsData` can be called to re-render with current theme.
+        // This requires `apiCall('/analytics/basic_summary')` to be efficient or data to be cached locally.
+        // A better approach:
+        if (profileUsageChartInstance) {
+            const isDark = document.body.classList.contains('dark-mode');
+            const newGridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            const newLabelColor = isDark ? getComputedStyle(document.documentElement).getPropertyValue('--theme-text-secondary').trim() : getComputedStyle(document.documentElement).getPropertyValue('--theme-text-primary').trim();
+            profileUsageChartInstance.options.plugins.legend.labels.color = newLabelColor;
+            // Pie charts don't have scales/grids like bar charts by default to update here.
+            profileUsageChartInstance.update();
+        }
+        if (topUsersChartInstance) {
+            const isDark = document.body.classList.contains('dark-mode');
+            const newGridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            const newLabelColor = isDark ? getComputedStyle(document.documentElement).getPropertyValue('--theme-text-secondary').trim() : getComputedStyle(document.documentElement).getPropertyValue('--theme-text-primary').trim();
+            topUsersChartInstance.options.scales.y.grid.color = newGridColor;
+            topUsersChartInstance.options.scales.y.ticks.color = newLabelColor;
+            topUsersChartInstance.options.scales.x.ticks.color = newLabelColor;
+            topUsersChartInstance.options.plugins.legend.labels.color = newLabelColor;
+            topUsersChartInstance.update();
+        }
+    }
+});
 
 
 function formatBytes(bytes) {

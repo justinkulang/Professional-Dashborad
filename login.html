@@ -9,132 +9,138 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Consistent with dashboard's new theme */
+            /* Core Palette */
             --primary-color: #1abc9c;
             --primary-color-darker: #16a085;
-            --secondary-color: #7f8c8d;
-            --danger-color: #e74c3c;
+            --secondary-color-static: #7f8c8d;
             --success-color: #2ecc71;
-            --light-color: #ecf0f1;
-            --dark-color: #2c3e50;
+            --danger-color: #e74c3c;
+            --dark-color-static: #2c3e50;
+            --light-color-static: #ecf0f1;
             --font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             --border-radius: 0.25rem;
-            --box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
+
+            /* Light Theme Defaults */
+            --theme-bg-main: var(--light-color-static);
+            --theme-bg-container: #ffffff;
+            --theme-text-primary: var(--dark-color-static);
+            --theme-text-secondary: var(--secondary-color-static);
+            --theme-text-label: #555;
+            --theme-text-on-primary-btn: var(--dark-color-static);
+            --theme-border-input: #bdc3c7;
+            --theme-box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
+            --theme-alert-danger-bg: #f8d7da;
+            --theme-alert-danger-text: var(--dark-color-static);
+            --theme-alert-danger-border: #f5c2c7;
+            --theme-alert-success-bg: #d1e7dd;
+            --theme-alert-success-text: var(--dark-color-static);
+            --theme-alert-success-border: #badbcc;
+            --theme-footer-text-color: var(--secondary-color-static);
         }
+
+        /* Dark Theme Overrides */
+        body.dark-mode {
+            --theme-bg-main: #2c3e50;
+            --theme-bg-container: #3b5166;
+            --theme-text-primary: #ecf0f1;
+            --theme-text-secondary: #bdc3c7;
+            --theme-text-label: #bdc3c7;
+            --theme-text-on-primary-btn: #ffffff;
+            --theme-border-input: #526d82;
+            --theme-box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.25);
+            --theme-alert-danger-bg: #c0392b;
+            --theme-alert-danger-text: #ffffff;
+            --theme-alert-danger-border: #e74c3c;
+            --theme-alert-success-bg: #27ae60;
+            --theme-alert-success-text: #ffffff;
+            --theme-alert-success-border: #2ecc71;
+            --theme-footer-text-color: var(--theme-text-secondary);
+        }
+
         body {
             font-family: var(--font-family);
             display: flex;
-            flex-direction: column; /* Allow footer to sit below */
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 100vh; /* Use min-height for footer */
-            background-color: var(--light-color);
+            min-height: 100vh;
+            background-color: var(--theme-bg-main);
+            color: var(--theme-text-primary);
             margin: 0;
             padding: 1rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         .login-container {
-            background: #fff;
-            padding: 2.5rem; /* Increased padding */
+            background: var(--theme-bg-container);
+            padding: 2.5rem;
             border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
+            box-shadow: var(--theme-box-shadow);
             width: 100%;
-            max-width: 450px; /* Slightly wider */
-            text-align: center; /* Center header text */
+            max-width: 450px;
+            text-align: center;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
         .login-container h2 {
-            color: var(--primary-color); /* Brand color */
-            margin-bottom: 0.5rem; /* Reduced margin */
-            font-size: 2rem; /* Larger title */
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
             font-weight: 700;
         }
         .login-container .subtitle {
-            color: var(--secondary-color);
+            color: var(--theme-text-secondary);
             font-size: 0.95em;
             margin-bottom: 2rem;
         }
         .form-group {
-            margin-bottom: 1.5rem; /* Increased margin */
-            text-align: left; /* Align labels left */
+            margin-bottom: 1.5rem;
+            text-align: left;
         }
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 500;
-            color: #555;
+            color: var(--theme-text-label);
+            transition: color 0.3s ease;
         }
         .form-group input[type="text"],
         .form-group input[type="number"],
         .form-group input[type="password"] {
             width: 100%;
-            padding: 0.85rem 1rem; /* Adjusted padding */
-            border: 1px solid #bdc3c7;
+            padding: 0.85rem 1rem;
+            border: 1px solid var(--theme-border-input);
             border-radius: var(--border-radius);
             box-sizing: border-box;
             font-size: 1rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            background-color: #fff;
+            background-color: var(--theme-bg-main); /* Match body or a slightly lighter input bg */
+            color: var(--theme-text-primary);
+            transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s ease, color 0.3s ease;
+        }
+        body.dark-mode .form-group input[type="text"],
+        body.dark-mode .form-group input[type="number"],
+        body.dark-mode .form-group input[type="password"] {
+            background-color: var(--theme-bg-container); /* Inputs slightly lighter than body in dark mode */
+        }
+
+        .form-group input::placeholder {
+             color: var(--theme-text-secondary);
+             opacity: 0.7;
         }
         .form-group input:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(26, 188, 156, .25); /* Teal focus */
+            box-shadow: 0 0 0 0.2rem rgba(26, 188, 156, .25);
         }
         .login-button {
             width: 100%;
             padding: 0.85rem 1rem;
             background-color: var(--primary-color);
-            color: white;
-            border: none;
+            color: var(--theme-text-on-primary-btn);
+            border: 1px solid var(--primary-color-darker);
             border-radius: var(--border-radius);
             font-size: 1.1rem;
             font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .login-button:hover {
-            background-color: var(--primary-color-darker);
-            transform: translateY(-1px);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-        .login-button .fas {
-            font-size: 1rem;
-        }
-        .alert {
-            padding: 0.85rem 1rem; /* Consistent padding */
-            margin-top: 1.5rem;
-            border: 1px solid transparent;
-            border-radius: var(--border-radius);
-            text-align: center;
-            font-size: 0.95rem; /* Slightly larger alert text */
-            font-weight: 500; /* Ensure text is bold enough */
-        }
-        .alert-danger {
-            color: var(--dark-color);
-            background-color: #f8d7da; /* Lighter background for dark text */
-            border-color: #f5c2c7;
-        }
-        .alert-success {
-            color: var(--dark-color);
-            background-color: #d1e7dd; /* Lighter background for dark text */
-            border-color: #badbcc;
-        }
-        /* Ensure login buttons have sufficient text contrast */
-        .login-button {
-            width: 100%;
-            padding: 0.85rem 1rem;
-            background-color: var(--primary-color);
-            color: var(--dark-color); /* Darker text for contrast on teal */
-            border: 1px solid var(--primary-color-darker); /* Border for definition */
-            border-radius: var(--border-radius);
-            font-size: 1.1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s, color 0.2s;
+            transition: background-color 0.2s, transform 0.1s, color 0.2s, box-shadow 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -147,18 +153,47 @@
             transform: translateY(-1px);
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
-        .login-button:active {
-            transform: scale(0.98); /* Pressed down effect */
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); /* Inner shadow for pressed feel */
-            background-color: var(--primary-color-darker); /* Keep darker bg on active */
+        body.dark-mode .login-button:hover {
+             box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         }
-        /* Explicit focus style for buttons if not covered by input:focus */
+        .login-button:active {
+            transform: scale(0.98);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+            background-color: var(--primary-color-darker);
+        }
+        body.dark-mode .login-button:active {
+            color: #fff; /* Ensure text stays white on active in dark mode */
+        }
+        body:not(.dark-mode) .login-button:active {
+             color: var(--dark-color-static);
+        }
         .login-button:focus {
             outline: 2px solid var(--primary-color-darker);
             outline-offset: 2px;
             box-shadow: 0 0 0 0.2rem rgba(26, 188, 156, .25);
         }
-
+        .login-button .fas {
+            font-size: 1rem;
+        }
+        .alert {
+            padding: 0.85rem 1rem;
+            margin-top: 1.5rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        .alert-danger {
+            color: var(--theme-alert-danger-text);
+            background-color: var(--theme-alert-danger-bg);
+            border: 1px solid var(--theme-alert-danger-border);
+        }
+        .alert-success {
+            color: var(--theme-alert-success-text);
+            background-color: var(--theme-alert-success-bg);
+            border: 1px solid var(--theme-alert-success-border);
+        }
         .loading-spinner {
             display: inline-block; width: 1em; height: 1em; vertical-align: -0.125em;
             border: .2em solid currentColor; border-right-color: transparent;
@@ -170,7 +205,8 @@
             margin-top: 2rem;
             text-align: center;
             font-size: 0.9em;
-            color: var(--secondary-color);
+            color: var(--theme-footer-text-color);
+            transition: color 0.3s ease;
         }
         .login-footer p {
             margin-bottom: 5px;
@@ -280,7 +316,7 @@
 
         // App Login Form Handler
         document.getElementById('appLoginForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Important: Keep this to allow JS fetch to handle submission
+            event.preventDefault();
             const csrfToken = getCsrfToken(); 
             const username = document.getElementById('appUsername').value;
             const password = document.getElementById('appPassword').value;
@@ -302,27 +338,16 @@
             appLoginButton.disabled = true;
             appLoginButton.innerHTML = `<span class="loading-spinner"></span> ${_('Connecting...')}`;
 
-            // FormData will be sent as 'multipart/form-data' or 'application/x-www-form-urlencoded'
-            // depending on the form attributes. Since we added method="POST",
-            // it's good practice to ensure Content-Type matches what Flask expects for request.form.
-            // However, Flask usually handles both. For explicit control:
             const formData = new FormData();
             formData.append('app_username', username);
             formData.append('app_password', password);
-            // Flask-WTF CSRF token is often sent as a form field named 'csrf_token'
-            // if not using the X-CSRFToken header method for AJAX.
-            // Since we have X-CSRFToken header, this form field is not strictly needed by Flask-WTF's CSRF check
-            // but doesn't hurt if action attribute is also present.
-            // formData.append('csrf_token', csrfToken);
 
-
-            fetch('/app-login', { // The JS fetch URL should match the route
+            fetch('/app-login', {
                 method: 'POST',
                 headers: {
-                    // 'Content-Type': 'application/x-www-form-urlencoded', // Not needed with FormData directly
                     'X-CSRFToken': csrfToken 
                 },
-                body: new URLSearchParams(formData) // Correctly encode FormData for x-www-form-urlencoded
+                body: new URLSearchParams(formData)
             })
             .then(response => response.json().then(data => ({ ok: response.ok, status: response.status, data })))
             .then(({ ok, status, data }) => {
