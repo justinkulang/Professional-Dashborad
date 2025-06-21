@@ -222,6 +222,53 @@
             color: var(--primary-color-darker);
         }
 
+        /* Empty State Styles */
+        .empty-state-container {
+            text-align: center;
+            padding: 3rem 1rem; /* Generous padding */
+            color: var(--secondary-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%; /* Ensure it takes full width of its container (e.g., a td) */
+            min-height: 200px; /* Give it some minimum height */
+        }
+
+        .empty-state-icon {
+            font-size: 3.5rem; /* Large icon */
+            color: var(--primary-color);
+            opacity: 0.5; /* Slightly more subtle icon */
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-state-title {
+            font-size: 1.25rem; /* Adjusted size */
+            color: var(--dark-color);
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .empty-state-text {
+            font-size: 0.9rem; /* Adjusted size */
+            line-height: 1.5;
+            max-width: 400px;
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-state-action {
+            /* Styling for the optional action button, inherits .btn styles */
+        }
+
+        /* Specific styling for empty states within tables */
+        td.empty-state-td {
+            border-bottom: none !important; /* Remove bottom border if it's the only 'row' */
+            background-color: #fff; /* Ensure it has a white background in tables */
+        }
+        tr.empty-state-row:hover { /* Prevent hover effect on the empty state row itself */
+            background-color: #fff !important;
+        }
+
 
         .analytics-grid {
             display: grid;
@@ -453,12 +500,22 @@
                     <h3 class="panel-header">Data Usage by Profile</h3>
                     <div class="chart-container">
                         <canvas id="profileUsageChart"></canvas>
+                        <div id="profileUsageChartEmptyState" class="empty-state-container" style="display: none; position: absolute; top: 0; left: 0; background-color: rgba(255,255,255,0.9); min-height: 300px;">
+                            <div class="empty-state-icon"><i class="fas fa-chart-pie"></i></div>
+                            <h5 class="empty-state-title">No Profile Data</h5>
+                            <p class="empty-state-text">No data usage by profile to display currently.</p>
+                        </div>
                     </div>
                 </div>
                 <div class="panel">
                     <h3 class="panel-header">Top 10 Users by Data Usage</h3>
                      <div class="chart-container">
                         <canvas id="topUsersChart"></canvas>
+                        <div id="topUsersChartEmptyState" class="empty-state-container" style="display: none; position: absolute; top: 0; left: 0; background-color: rgba(255,255,255,0.9); min-height: 300px;">
+                            <div class="empty-state-icon"><i class="fas fa-users"></i></div>
+                            <h5 class="empty-state-title">No User Data</h5>
+                            <p class="empty-state-text">No user data usage to display for the top 10 chart.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1019,14 +1076,45 @@ async function loadUsers(silent = false) {
         tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;">${getTranslation('Not connected to Mikrotik router. Cannot load users.')} <a href="#" onclick="navigateToTab('settings'); return false;">Configure Settings</a>.</td></tr>`;
         return;
     }
-    if (!silent) tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;"><div class="loading-spinner"></div> ${getTranslation('Loading users...')}</td></tr>`;
+    if (!silent) {
+        const loadingHTML = `
+            <tr class="empty-state-row">
+                <td colspan="9" class="empty-state-td">
+                    <div class="empty-state-container" style="min-height: 200px;">
+                        <div class="loading-spinner" style="font-size: 1.8em; margin-bottom: 1.2rem; color: var(--primary-color);"></div>
+                        <h5 class="empty-state-title" style="margin-bottom: 0.5rem;">${getTranslation('Loading users...')}</h5>
+                        <p class="empty-state-text">Please wait while we fetch the user data from the router.</p>
+                    </div>
+                </td>
+            </tr>`;
+        tbody.innerHTML = loadingHTML;
+    }
     
     const data = await apiCall('/users');
     if (data && data.users) {
         currentUsers = data.users;
-        filterAndDisplayUsers(); // This will show "No users match criteria" if empty after filter
-        if (currentUsers.length === 0 && !document.getElementById('userSearchInput').value && !document.getElementById('userFilterProfile').value && !document.getElementById('userFilterStatus').value) {
-             tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;">${getTranslation('No users found on the router.')}</td></tr>`;
+        // If no search/filter is active and the list is empty, show the "No users on router" empty state
+        if (currentUsers.length === 0 &&
+            !document.getElementById('userSearchInput').value &&
+            !document.getElementById('userFilterProfile').value &&
+            !document.getElementById('userFilterStatus').value) {
+
+            const emptyHTML = `
+                <tr class="empty-state-row">
+                    <td colspan="9" class="empty-state-td">
+                        <div class="empty-state-container">
+                            <div class="empty-state-icon"><i class="fas fa-ghost"></i></div>
+                            <h5 class="empty-state-title">No Hotspot Users Found</h5>
+                            <p class="empty-state-text">There are currently no users configured on your Mikrotik router. You can add some in the 'Create' section!</p>
+                            <button class="btn btn-primary empty-state-action" onclick="document.querySelector('.nav-link[data-tab=\\'create\\']').click();">
+                                <i class="fas fa-user-plus"></i> Create User
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+            tbody.innerHTML = emptyHTML;
+        } else {
+            filterAndDisplayUsers(); // Otherwise, filter and display (which handles "no match" itself)
         }
     } else if (data === null && document.querySelector('#connectionStatus').classList.contains('connected')) {
         // Data is null but connection status was 'connected' - implies an issue during API call not related to initial connection
@@ -1165,13 +1253,33 @@ async function loadActiveSessions() {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">${getTranslation('Not connected to Mikrotik router. Cannot load sessions.')} <a href="#" onclick="navigateToTab('settings'); return false;">Configure Settings</a>.</td></tr>`;
         return;
     }
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;"><div class="loading-spinner"></div> ${getTranslation('Loading sessions...')}</td></tr>`;
+    const loadingHTML = `
+        <tr class="empty-state-row">
+            <td colspan="7" class="empty-state-td">
+                <div class="empty-state-container" style="min-height: 200px;">
+                    <div class="loading-spinner" style="font-size: 1.8em; margin-bottom: 1.2rem; color: var(--primary-color);"></div>
+                    <h5 class="empty-state-title" style="margin-bottom: 0.5rem;">${getTranslation('Loading sessions...')}</h5>
+                    <p class="empty-state-text">Please wait while we fetch active session data.</p>
+                </div>
+            </td>
+        </tr>`;
+    tbody.innerHTML = loadingHTML;
     
     const data = await apiCall('/active-sessions');
     if (data && data.sessions) {
         currentSessions = data.sessions;
         if (currentSessions.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">${getTranslation('No active sessions found.')}</td></tr>`;
+            const emptyHTML = `
+                <tr class="empty-state-row">
+                    <td colspan="7" class="empty-state-td">
+                        <div class="empty-state-container">
+                            <div class="empty-state-icon"><i class="fas fa-wifi-slash"></i></div>
+                            <h5 class="empty-state-title">No Active Sessions</h5>
+                            <p class="empty-state-text">There are currently no active user sessions on the hotspot.</p>
+                        </div>
+                    </td>
+                </tr>`;
+            tbody.innerHTML = emptyHTML;
             return;
         }
         tbody.innerHTML = currentSessions.map(s => `
@@ -1227,7 +1335,17 @@ function filterAndDisplayUsers() {
     
     const tbody = document.querySelector('#usersTable tbody');
     if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;">No users match the criteria.</td></tr>`;
+        const emptyHTML = `
+            <tr class="empty-state-row">
+                <td colspan="9" class="empty-state-td">
+                    <div class="empty-state-container">
+                        <div class="empty-state-icon"><i class="fas fa-users-slash"></i></div>
+                        <h5 class="empty-state-title">No Users Match Your Criteria</h5>
+                        <p class="empty-state-text">Try adjusting your search or filter settings to find what you're looking for.</p>
+                    </div>
+                </td>
+            </tr>`;
+        tbody.innerHTML = emptyHTML;
         return;
     }
 
@@ -1251,8 +1369,21 @@ function filterAndDisplayUsers() {
 
 function displayProfiles() {
     const tbody = document.querySelector('#profilesTable tbody');
-     if (currentProfiles.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No profiles found.</td></tr>`;
+    if (currentProfiles.length === 0) {
+        const emptyHTML = `
+            <tr class="empty-state-row">
+                <td colspan="5" class="empty-state-td">
+                    <div class="empty-state-container">
+                        <div class="empty-state-icon"><i class="fas fa-folder-open"></i></div>
+                        <h5 class="empty-state-title">No User Profiles Found</h5>
+                        <p class="empty-state-text">Hotspot user profiles define rules like speed limits and session times. You can add them here.</p>
+                        <button class="btn btn-primary empty-state-action" onclick="openProfileModal()">
+                            <i class="fas fa-plus"></i> Add Profile
+                        </button>
+                    </div>
+                </td>
+            </tr>`;
+        tbody.innerHTML = emptyHTML;
         return;
     }
     tbody.innerHTML = currentProfiles.map(p => `
@@ -1608,6 +1739,9 @@ async function loadAnalyticsData() {
     }
     
     if (totalDataEl) totalDataEl.textContent = 'Total Data Transferred: ' + formatBytes(data.total_data_all_users);
+
+    const profileChartEmptyState = document.getElementById('profileUsageChartEmptyState');
+    const topUsersChartEmptyState = document.getElementById('topUsersChartEmptyState');
     
     // Render Profile Usage Chart (Pie)
     const profileCtx = document.getElementById('profileUsageChart').getContext('2d');
@@ -1615,89 +1749,87 @@ async function loadAnalyticsData() {
         profileUsageChartInstance.destroy();
     }
     const profileData = data.data_usage_by_profile || {};
-    profileUsageChartInstance = new Chart(profileCtx, {
-        type: 'pie',
-        data: {
-            labels: Object.keys(profileData),
-            datasets: [{
-                label: 'Data Usage',
-                data: Object.values(profileData),
-                backgroundColor: [ // Add some colors
-                    '#0d6efd', '#198754', '#ffc107', '#dc3545', '#6c757d', 
-                    '#0dcaf0', '#6610f2', '#fd7e14'
-                ],
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.label || '';
-                            if (label) {
-                                label += ': ';
+    if (Object.keys(profileData).length === 0) {
+        profileChartEmptyState.style.display = 'flex'; // Show empty state
+    } else {
+        profileChartEmptyState.style.display = 'none'; // Hide empty state
+        profileUsageChartInstance = new Chart(profileCtx, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(profileData),
+                datasets: [{
+                    label: 'Data Usage',
+                    data: Object.values(profileData),
+                    backgroundColor: [
+                        '#1abc9c', '#2ecc71', '#3498db', '#f1c40f', '#e74c3c',
+                        '#9b59b6', '#34495e', '#7f8c8d', '#16a085', '#27ae60'
+                    ],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) { label += ': '; }
+                                if (context.parsed !== null) { label += formatBytes(context.parsed); }
+                                return label;
                             }
-                            if (context.parsed !== null) {
-                                label += formatBytes(context.parsed);
-                            }
-                            return label;
                         }
                     }
                 }
             }
-        }
-    });
+        });
+    }
 
-    // Render Top Users Chart (Bar)
+    // Render Top 10 Users Chart (Bar)
     const topUsersCtx = document.getElementById('topUsersChart').getContext('2d');
     if (topUsersChartInstance) {
         topUsersChartInstance.destroy();
     }
-    const topUsers = data.all_users_sorted_by_data.slice(0, 10);
-    topUsersChartInstance = new Chart(topUsersCtx, {
-        type: 'bar',
-        data: {
-            labels: topUsers.map(u => u.name),
-            datasets: [{
-                label: 'Total Data Usage',
-                data: topUsers.map(u => u.total_data),
-                backgroundColor: '#198754'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return formatBytes(value);
-                        }
-                    }
-                }
+    const topUsers = data.all_users_sorted_by_data ? data.all_users_sorted_by_data.slice(0, 10) : [];
+    if (topUsers.length === 0) {
+        topUsersChartEmptyState.style.display = 'flex'; // Show empty state
+    } else {
+        topUsersChartEmptyState.style.display = 'none'; // Hide empty state
+        topUsersChartInstance = new Chart(topUsersCtx, {
+            type: 'bar',
+            data: {
+                labels: topUsers.map(u => u.name),
+                datasets: [{
+                    label: 'Total Data Usage',
+                    data: topUsers.map(u => u.total_data),
+                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#1abc9c' // Use theme color
+                }]
             },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.dataset.label || '';
-                             if (label) {
-                                label += ': ';
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: function(value) { return formatBytes(value); } }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) { label += ': '; }
+                                if (context.parsed.y !== null) { label += formatBytes(context.parsed.y); }
+                                return label;
                             }
-                            if (context.parsed.y !== null) {
-                                label += formatBytes(context.parsed.y);
-                            }
-                            return label;
                         }
                     }
                 }
             }
-        }
-    });
+        });
+    }
 }
 
 
