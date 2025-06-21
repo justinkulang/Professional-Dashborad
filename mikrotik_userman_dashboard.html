@@ -446,7 +446,7 @@
         
         <div id="maintenance" class="tab-content" role="tabpanel" aria-labelledby="tab-maintenance">
             <div class="panel">
-                <h3 class="panel-header">User Profiles</h3>
+                <h3 class="panel-header"><i class="fas fa-id-badge" style="margin-right: 8px; color: var(--primary-color);"></i>User Profiles</h3>
                 <button class="btn btn-success" style="margin-bottom: 1rem;" onclick="openProfileModal()"><i class="fas fa-plus"></i> Add Profile</button>
                 <div class="table-container">
                     <table id="profilesTable">
@@ -456,13 +456,13 @@
                 </div>
             </div>
             <div class="panel">
-                <h3 class="panel-header">Cleanup</h3>
+                <h3 class="panel-header"><i class="fas fa-broom" style="margin-right: 8px; color: var(--primary-color);"></i>Cleanup</h3>
                 <p>Automatically find and delete users who have used up their time or data allowance.</p>
                 <button class="btn btn-danger" onclick="deleteExpiredUsers()"><i class="fas fa-trash-alt"></i> Delete Expired Users</button>
             </div>
 
             <div class="panel">
-                <h3 class="panel-header">Delete Users by Profile</h3>
+                <h3 class="panel-header"><i class="fas fa-user-tag" style="margin-right: 8px; color: var(--primary-color);"></i>Delete Users by Profile</h3>
                 <div class="form-group">
                     <label for="deleteByProfileSelect">Select Profile to Delete Users From:</label>
                     <select id="deleteByProfileSelect"></select> 
@@ -471,7 +471,7 @@
             </div>
 
             <div class="panel">
-                <h3 class="panel-header">Delete Users by Active Status</h3>
+                <h3 class="panel-header"><i class="fas fa-user-check" style="margin-right: 8px; color: var(--primary-color);"></i>Delete Users by Active Status</h3>
                 <div class="form-group">
                     <label for="deleteByStatusSelect">Select User Status to Delete:</label>
                     <select id="deleteByStatusSelect"> 
