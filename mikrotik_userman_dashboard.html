@@ -169,6 +169,7 @@
             <li><a href="#" class="nav-link" data-tab="analytics"><i class="fas fa-chart-line"></i><span>Analytics</span></a></li>
             <li><a href="#" class="nav-link" data-tab="maintenance"><i class="fas fa-tools"></i><span>Maintenance</span></a></li>
             <li><a href="#" class="nav-link" data-tab="settings"><i class="fas fa-cog"></i><span>Settings</span></a></li>
+            <li><a href="#" class="nav-link" data-tab="router_admin_users"><i class="fas fa-user-shield"></i><span>Router Admins</span></a></li>
             <li><a href="#" id="logoutButton" class="nav-link"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
         </ul>
         <div class="sidebar-footer" style="text-align: center; padding: 15px 10px; font-size: 0.85em; color: #495057; border-top: 1px solid #dee2e6; margin-top: auto;">
@@ -425,6 +426,32 @@
                 </form>
             </div>
         </div>
+
+        <div id="router_admin_users" class="tab-content">
+            <div class="panel">
+                <h3 class="panel-header">Create Router Admin User</h3>
+                <form id="createRouterAdminUserForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="routerAdminUsername">Username</label>
+                            <input type="text" id="routerAdminUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="routerAdminPassword">Password</label>
+                            <input type="password" id="routerAdminPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="routerAdminGroup">Group</label>
+                            <select id="routerAdminGroup" required>
+                                <option value="">Loading groups...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Create Admin User</button>
+                </form>
+            </div>
+        </div>
+
     </main>
 
     <div id="userModal" class="modal">
@@ -538,6 +565,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Setup static translated UI elements not covered by other functions
     setupStaticTranslations();
 
+    // Listener for the new Router Admins tab
+    const routerAdminNavLink = document.querySelector('a[data-tab="router_admin_users"]');
+    if (routerAdminNavLink) {
+        routerAdminNavLink.addEventListener('click', () => {
+            if (document.getElementById('router_admin_users').classList.contains('active')) {
+                loadRouterUserGroups();
+            }
+        });
+    }
+    // Initial call if the tab is active by default (though unlikely)
+    if (document.getElementById('router_admin_users') && document.getElementById('router_admin_users').classList.contains('active')) {
+        loadRouterUserGroups();
+    }
 
     // Setup filter listeners
     document.getElementById('userSearchInput').addEventListener('input', () => filterAndDisplayUsers());
@@ -561,6 +601,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('bulkCreateUserForm').addEventListener('submit', handleBulkCreateUsers);
     document.getElementById('editUserForm').addEventListener('submit', handleEditUser);
     document.getElementById('profileForm').addEventListener('submit', handleProfileSave);
+    const createRouterAdminUserForm = document.getElementById('createRouterAdminUserForm');
+    if (createRouterAdminUserForm) {
+        createRouterAdminUserForm.addEventListener('submit', handleCreateRouterAdminUser);
+    }
 
     const logoutButton = document.getElementById('logoutButton');
     if (logoutButton) {
@@ -777,6 +821,60 @@ async function apiCall(endpoint, options = {}) {
     }
 }
 
+async function handleCreateRouterAdminUser(e) {
+    e.preventDefault();
+    const form = e.target;
+    const username = document.getElementById('routerAdminUsername').value;
+    const password = document.getElementById('routerAdminPassword').value;
+    const group = document.getElementById('routerAdminGroup').value;
+
+    if (!group) {
+        showAlert('globalAlert', 'warning', getTranslation('Please select a group for the admin user.'));
+        return;
+    }
+
+    const payload = { username, password, group };
+    const result = await apiCall('/router-admin-users', { method: 'POST', body: JSON.stringify(payload) });
+
+    if (result && result.success) {
+        showAlert('globalAlert', 'success', result.message || getTranslation('Router admin user created successfully!'));
+        form.reset(); // Reset form fields
+        // Optionally, reload groups in case default groups changed or for consistency, though not strictly necessary here
+        // loadRouterUserGroups();
+    } else if (result) {
+        showAlert('globalAlert', 'danger', result.message || getTranslation('Failed to create router admin user.'));
+    }
+    // If result is null, apiCall already showed an error.
+}
+
+async function loadRouterUserGroups() {
+    const select = document.getElementById('routerAdminGroup');
+    if (!select) return;
+
+    if (!document.querySelector('#connectionStatus').classList.contains('connected')) {
+        select.innerHTML = `<option value="">${getTranslation('Not Connected')}</option>`;
+        select.disabled = true;
+        return;
+    }
+    select.disabled = false;
+    select.innerHTML = `<option value="">${getTranslation('Loading groups...')}</option>`;
+
+    const result = await apiCall('/router-user-groups');
+    if (result && result.success && result.groups) {
+        if (result.groups.length === 0) {
+            select.innerHTML = `<option value="">${getTranslation('No groups found on router.')}</option>`;
+        } else {
+            select.innerHTML = `<option value="">-- ${getTranslation('Select Group')} --</option>`;
+            result.groups.forEach(groupName => {
+                select.add(new Option(groupName, groupName));
+            });
+        }
+    } else {
+        select.innerHTML = `<option value="">${getTranslation('Failed to load groups.')}</option>`;
+        showAlert('globalAlert', 'danger', result ? result.message : getTranslation('Could not load router user groups.'));
+    }
+}
+
 async function checkConnection(isInitialLoad = false) {
     const statusEl = document.getElementById('connectionStatus');
     // Do not show global spinner for the initial, automatic checkConnection call.
@@ -866,6 +964,16 @@ function updateUIAfterConnectionCheck(isConnected, isInitialLoad = false) {
         // Test button in settings should always be enabled:
         // document.querySelector('#configForm button[onclick="testConnection()"]').disabled = false;
     ];
+
+    // Add elements from the new "Router Admins" tab to be disabled if not connected
+    if (document.getElementById('router_admin_users')) { // Check if tab exists
+        mikrotikDependentElements.push(
+            '#routerAdminUsername',
+            '#routerAdminPassword',
+            '#routerAdminGroup',
+            '#createRouterAdminUserForm button'
+        );
+    }
 
     mikrotikDependentElements.forEach(selector => {
         if (typeof selector === 'string') {

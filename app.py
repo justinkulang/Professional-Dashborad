@@ -867,6 +867,52 @@ class RouterOSService:
             logger.error(f"Error during expired user cleanup: {str(e)}")
             return False, f"An unexpected error occurred: {str(e)}", 0
 
+    def get_router_user_groups(self) -> list:
+        """Get router user groups."""
+        try:
+            api = get_mikrotik_api()
+            if api is None:
+                logger.error("Error getting router user groups: Mikrotik API not available.")
+                return []
+            groups = list(api.path('/user/group').select('name'))
+            # Ensure 'name' is extracted directly if groups are like [{'name': 'full'}, ...]
+            return [g['name'] for g in groups if 'name' in g]
+        except Exception as e:
+            logger.error(f"Error getting router user groups: {str(e)}")
+            return []
+
+    def create_router_admin_user(self, username: str, group: str, password: str) -> tuple[bool, str]:
+        """Create a new router admin user."""
+        try:
+            api = get_mikrotik_api()
+            if api is None:
+                return False, "Mikrotik connection not available"
+
+            # Check if user already exists
+            existing_users = list(api.path('/user').select('.id').where(name=username))
+            if existing_users:
+                return False, f"Admin user '{username}' already exists."
+
+            # Check if group is valid (optional, but good practice)
+            # This assumes get_router_user_groups works and is efficient enough,
+            # or that we trust the group name provided from a UI populated by it.
+            # For simplicity here, we'll rely on the API to reject invalid groups if necessary,
+            # or assume the UI provides valid groups.
+
+            api.path('/user').add(name=username, group=group, password=password)
+            return True, f"Admin user '{username}' created successfully with group '{group}'."
+        except TrapError as e:
+            logger.error(f"Error creating admin user '{username}': {str(e)}")
+            # Provide more specific error messages if possible based on TrapError details
+            if "already have user with this name" in str(e).lower():
+                return False, f"Admin user '{username}' already exists on the router."
+            if "no such group" in str(e).lower():
+                return False, f"Router user group '{group}' does not exist."
+            return False, f"Mikrotik Trap Error: {str(e)}"
+        except Exception as e:
+            logger.error(f"Unexpected error creating admin user '{username}': {str(e)}")
+            return False, f"An unexpected error occurred: {str(e)}"
+
     def get_basic_bandwidth_analytics(self) -> dict:
         """Calculates basic bandwidth analytics from hotspot user data."""
         users = self.get_hotspot_users() # This already handles API non-availability by returning []
@@ -1453,6 +1499,37 @@ def get_basic_analytics_summary_route():
     except Exception as e:
         logger.error(f"API: Error fetching basic analytics: {str(e)}")
         return jsonify({'success': False, 'message': _('A server error occurred while fetching analytics: {error}').format(error=str(e))}), 500
+
+@app.route('/api/router-user-groups', methods=['GET'])
+@login_required
+def get_router_user_groups_route():
+    groups = router_os_service.get_router_user_groups()
+    if get_mikrotik_api() is None and not groups: # Check if API was unavailable for the call
+        return jsonify({'success': False, 'message': _('Mikrotik API not available. Could not fetch user groups.'), 'groups': []}), 503
+    return jsonify({'success': True, 'groups': groups})
+
+@app.route('/api/router-admin-users', methods=['POST'])
+@login_required
+def create_router_admin_user_route():
+    data = request.json
+    username = data.get('username')
+    group = data.get('group')
+    password = data.get('password')
+
+    if not all([username, group, password]):
+        return jsonify({'success': False, 'message': _('Username, group, and password are required.')}), 400
+
+    success, message = router_os_service.create_router_admin_user(username, group, password)
+    if success:
+        return jsonify({'success': True, 'message': message})
+    else:
+        # Determine appropriate status code based on message content
+        status_code = 400 # Default for bad request (e.g., validation error)
+        if "already exists" in message.lower():
+            status_code = 409 # Conflict
+        elif "not available" in message.lower(): # Mikrotik connection issue
+            status_code = 503 # Service unavailable
+        return jsonify({'success': False, 'message': message}), status_code
 
 @app.route('/api/translations')
 # This route is called by login.html, so it should be accessible without app login.
